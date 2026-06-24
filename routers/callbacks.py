@@ -22,3 +22,8 @@ class ComplianceCallback(CallbackData, prefix="compliance"):
 
 class MenuCallback(CallbackData, prefix="menu"):
     action: str
+
+
+class OfferCallback(CallbackData, prefix="offer"):
+    action: str
+    offer_id: str

@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     environment: Literal["dev", "prod"] = "dev"
     log_level: str = "INFO"
     default_lang: str = "en"
+    bot_username: str = ""
 
     # --- payments (optional) ---
     payments_enabled: bool = False

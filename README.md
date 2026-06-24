@@ -176,6 +176,45 @@ All timestamps are persisted to the `users` table (`age_confirmed_at`,
 
 ---
 
+## Referral & Attribution
+
+### Referral codes
+Each user gets a deterministic referral code (base62 of their telegram_id + a
+checksum char). Deep links follow the format `https://t.me/<bot_username>?start=<code>`.
+
+When a user opens the bot via a deep link, a **click** is recorded with
+`source=telegram` and attributed to the referral's owner.
+
+### Attribution rules (documented assumptions)
+- **Last-touch within a 30-day window**: the most recent click for a referral
+  within 30 days is used for conversion attribution.
+- **Self-referral blocked**: if `owner_user_id == converting_user_id`, the
+  conversion is rejected and flagged.
+- **Dedup by `partner_conversion_id`**: duplicate postbacks return a no-op 200
+  (retry-safe).
+
+### Anti-fraud (flag, don't auto-ban)
+- **Duplicate click filtering**: same referral + user + offer within a 5-min window.
+- **Velocity check**: max 10 clicks/min per user or IP-hash.
+- **Self-referral block**: owner converting via own link.
+- **Fingerprint check**: same IP-hash across >3 accounts → flagged as suspicious.
+
+### Webhook endpoints (FastAPI, runs if `WEBHOOK_ENABLED=true`)
+```
+POST /webhooks/affiliate/{provider}   — affiliate postbacks
+POST /webhooks/payments/{provider}     — payment callbacks (Step 5)
+GET  /health                           — health check
+```
+Secret verified via `X-Webhook-Secret` header or `secret_token`. Idempotency via
+`webhook_events.dedupe_hash` (SHA-256 of provider + raw body).
+
+Start the webhook server separately:
+```bash
+uvicorn app.webhook_app:create_app --factory --host 0.0.0.0 --port 8080
+```
+
+---
+
 ## Lint / Type-check / Test
 
 ```bash

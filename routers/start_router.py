@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings
 from app.logging_conf import get_logger
-from db.base import Lang
+from db.base import ClickSource, Lang
 from db.models import User
 from db.repositories import UserRepository
 from routers.callbacks import ComplianceCallback, LangCallback
@@ -74,6 +74,7 @@ async def cmd_start(
     message: Message,
     command: CommandObject,
     user: User | None,
+    session: AsyncSession,
     t: Translator,
     bot: Bot,
 ) -> None:
@@ -82,7 +83,16 @@ async def cmd_start(
         payload = _validate_payload(command.args)
         if payload:
             log.info("deep_link.received", payload=payload, user_id=user.id if user else None)
-            # TODO(M4): persist referral attribution via stashed payload.
+            # Record click attribution (source=telegram).
+            from services.referral_service import ReferralService
+            ref_service = ReferralService(session)
+            referral = await ref_service.resolve_referral_code(payload)
+            if referral:
+                await ref_service.record_click(
+                    referral=referral,
+                    user=user,
+                    source=ClickSource.telegram,
+                )
 
     if is_user_compliant(user):
         await bot.send_message(

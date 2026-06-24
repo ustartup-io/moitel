@@ -23,5 +23,10 @@
   "common.no": "❌ No",
   "error.generic": "😵 Something went wrong. Please try again later.",
   "throttle.slow_down": "⏳ Please slow down. Try again in a moment.",
-  "stub.not_ready": "🔧 This feature is coming soon."
+  "stub.not_ready": "🔧 This feature is coming soon.",
+  "referral.title": "🔗 Your Referral Program",
+  "referral.your_link": "📋 Your referral link:\n{link}",
+  "referral.stats": "📊 Your stats:\n• Referrals: {referrals}\n• Clicks: {clicks}\n• Conversions: {conversions}",
+  "referral.no_code": "❌ You don't have a referral code yet.",
+  "referral.share_hint": "💡 Share this link with friends. When they sign up and convert, you earn!"
 }

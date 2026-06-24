@@ -40,6 +40,7 @@ def build_dispatcher() -> Dispatcher:
 
     from middlewares import register_middlewares
     from routers.common_router import router as common_router
+    from routers.referral_router import router as referral_router
     from routers.start_router import router as start_router
     from utils.i18n import i18n
 
@@ -49,8 +50,9 @@ def build_dispatcher() -> Dispatcher:
     dp = Dispatcher()
     register_middlewares(dp)
 
-    # Routers are included in priority order: start first, then common.
+    # Routers are included in priority order: start first, then referral, then common.
     dp.include_router(start_router)
+    dp.include_router(referral_router)
     dp.include_router(common_router)
 
     return dp
@@ -68,7 +70,7 @@ async def amain(*, check: bool = False) -> None:
     )
 
     dp = build_dispatcher()
-    log.info("dispatcher.ready", routers=["start", "common"])
+    log.info("dispatcher.ready", routers=["start", "referral", "common"])
 
     if check:
         log.info("boot.check.ok", message="Boot smoke check passed; not starting polling.")
