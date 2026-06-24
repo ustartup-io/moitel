@@ -28,5 +28,12 @@
   "referral.your_link": "📋 Your referral link:\n{link}",
   "referral.stats": "📊 Your stats:\n• Referrals: {referrals}\n• Clicks: {clicks}\n• Conversions: {conversions}",
   "referral.no_code": "❌ You don't have a referral code yet.",
-  "referral.share_hint": "💡 Share this link with friends. When they sign up and convert, you earn!"
+  "referral.share_hint": "💡 Share this link with friends. When they sign up and convert, you earn!",
+  "payment.invoice_created": "💸 Invoice created! Pay here:\n{pay_url}\n\nAmount: {amount} {currency}\n\nAfter payment, your access will be delivered automatically.",
+  "payment.already_paid": "✅ You already have access to this.",
+  "payment.expired": "⏰ The invoice has expired. Please try again.",
+  "payment.failed": "❌ Payment failed. Please try again or contact support.",
+  "payment.disabled": "⛔ Payments are not available at this time.",
+  "delivery.title": "🎁 Your Access",
+  "delivery.access_granted": "✅ Your access has been granted! Check below."
 }

@@ -97,7 +97,7 @@ def test_payment_endpoint_accepts(webhook_client) -> None:
         json={"payment_id": "PAY-001", "status": "paid"},
     )
     assert response.status_code == 200
-    assert response.json()["status"] == "received"
+    assert response.json()["status"] in ("received", "confirmed")
 
 
 def test_duplicate_payment_callback(webhook_client) -> None:

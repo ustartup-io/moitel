@@ -28,6 +28,9 @@ from db.base import (
     WebhookStatus,
 )
 from db.models import (
+    AdminAuditLog,
+    Broadcast,
+    BroadcastRecipient,
     Click,
     Conversion,
     Delivery,
@@ -275,6 +278,34 @@ class PaymentRepository(Repository):
         await self.session.flush()
         return payment
 
+    async def get_pending(self) -> list[Payment]:
+        """Return all payments in pending or created status (for polling)."""
+        result = await self.session.execute(
+            select(Payment)
+            .where(Payment.status.in_([PaymentStatus.pending, PaymentStatus.created]))
+            .order_by(Payment.id)
+        )
+        return list(result.scalars().all())
+
+    async def mark_expired(self, payment_id: int) -> Payment | None:
+        payment = await self.session.get(Payment, payment_id)
+        if payment is None:
+            return None
+        payment.status = PaymentStatus.expired
+        await self.session.flush()
+        return payment
+
+    async def mark_failed(self, payment_id: int) -> Payment | None:
+        payment = await self.session.get(Payment, payment_id)
+        if payment is None:
+            return None
+        payment.status = PaymentStatus.failed
+        await self.session.flush()
+        return payment
+
+    async def get_by_id(self, payment_id: int) -> Payment | None:
+        return await self.session.get(Payment, payment_id)
+
 
 class DeliveryRepository(Repository):
     async def create(
@@ -313,6 +344,35 @@ class DeliveryRepository(Repository):
         delivery.sent_at = datetime.now(UTC)
         await self.session.flush()
         return delivery
+
+    async def mark_failed(self, delivery_id: int, error: str) -> Delivery | None:
+        delivery = await self.session.get(Delivery, delivery_id)
+        if delivery is None:
+            return None
+        delivery.status = DeliveryStatus.failed
+        delivery.last_error = error
+        await self.session.flush()
+        return delivery
+
+    async def increment_attempts(self, delivery_id: int, error: str | None = None) -> Delivery | None:
+        delivery = await self.session.get(Delivery, delivery_id)
+        if delivery is None:
+            return None
+        delivery.attempts += 1
+        if error:
+            delivery.last_error = error
+        await self.session.flush()
+        return delivery
+
+    async def get_failed(self) -> list[Delivery]:
+        """Return deliveries in failed status that haven't exceeded retry cap."""
+        result = await self.session.execute(
+            select(Delivery)
+            .where(Delivery.status == DeliveryStatus.failed)
+            .where(Delivery.attempts < 5)
+            .order_by(Delivery.id)
+        )
+        return list(result.scalars().all())
 
 
 class SupportRepository(Repository):
@@ -376,3 +436,44 @@ class WebhookEventRepository(Repository):
         event.processed_at = datetime.now(UTC)
         await self.session.flush()
         return event
+
+
+class BroadcastRepository(Repository):
+    """Repository for broadcasts + recipients (used in Step 7)."""
+
+    async def create_broadcast(
+        self, *, admin_id: int, body_key_or_text: str, segment: str
+    ) -> Broadcast:
+        bc = Broadcast(
+            admin_id=admin_id,
+            body_key_or_text=body_key_or_text,
+            segment=segment,
+        )
+        self.session.add(bc)
+        await self.session.flush()
+        return bc
+
+    async def add_recipients(self, broadcast_id: int, user_ids: list[int]) -> None:
+        for uid in user_ids:
+            recipient = BroadcastRecipient(broadcast_id=broadcast_id, user_id=uid)
+            self.session.add(recipient)
+        await self.session.flush()
+
+
+class AdminAuditLogRepository(Repository):
+    """Repository for admin audit logs."""
+
+    async def create(
+        self, *, admin_id: int, action: str, target_type: str | None = None,
+        target_id: str | None = None, meta_json: str | None = None,
+    ) -> AdminAuditLog:
+        log_entry = AdminAuditLog(
+            admin_id=admin_id,
+            action=action,
+            target_type=target_type,
+            target_id=target_id,
+            meta_json=meta_json,
+        )
+        self.session.add(log_entry)
+        await self.session.flush()
+        return log_entry

@@ -28,6 +28,7 @@ def test_settings_loads_required(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_settings_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
     _set_env(monkeypatch, SAMPLE_ENV)
+    monkeypatch.setenv("PAYMENTS_ENABLED", "false")
     settings = Settings(_env_file=None)
     assert settings.environment == "dev"
     assert settings.log_level == "INFO"
@@ -60,6 +61,7 @@ def test_settings_lang_validation(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_fail_fast_prod_passes_when_clean(monkeypatch: pytest.MonkeyPatch) -> None:
     _set_env(monkeypatch, SAMPLE_ENV)
     monkeypatch.setenv("ENVIRONMENT", "prod")
+    monkeypatch.setenv("PAYMENTS_ENABLED", "false")
     settings = Settings(_env_file=None)
     settings.fail_fast_prod()  # no payments/webhook enabled -> no error
 

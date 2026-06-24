@@ -12,6 +12,7 @@ Endpoints:
 from __future__ import annotations
 
 import json
+from contextlib import suppress
 from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException, Path, Request
@@ -194,10 +195,23 @@ async def payment_callback(
         log.error("webhook.payment.invalid_payload", error=str(exc))
         raise HTTPException(status_code=422, detail=f"Invalid payload: {exc}") from exc
 
-    # TODO(M5): wire payment confirmation -> auto-delivery.
-    log.info("webhook.payment.received", payment_id=payload.payment_id, status=payload.status)
+    # Look up payment by payload (our internal ID) and confirm.
+    payment_id: int | None = None
+    with suppress(ValueError):
+        payment_id = int(payload.payment_id)
 
-    return {"status": "received", "payment_id": payload.payment_id}
+    async with get_session() as session:
+        from services.payment_service import PaymentService
+        pay_service = PaymentService(session)
+        await pay_service.confirm_payment(
+            provider_invoice_id=payload.payment_id,
+            payment_id_from_payload=payment_id,
+        )
+        await session.commit()
+
+    log.info("webhook.payment.confirmed", payment_id=payload.payment_id, status=payload.status)
+
+    return {"status": "confirmed", "payment_id": payload.payment_id}
 
 
 # --- App factory -------------------------------------------------------------

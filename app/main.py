@@ -80,10 +80,19 @@ async def amain(*, check: bool = False) -> None:
 
     bot = Bot(token=settings.bot_token.get_secret_value())
 
+    # Start background jobs if payments are enabled.
+    job_mgr = None
+    if settings.payments_enabled:
+        from services.jobs import job_manager
+        job_mgr = job_manager
+        await job_mgr.start_all()
+
     log.info("bot.polling.start")
     try:
         await dp.start_polling(bot)
     finally:
+        if job_mgr is not None:
+            await job_mgr.stop_all()
         await bot.session.close()
         log.info("bot.stopped")
 

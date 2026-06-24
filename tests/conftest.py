@@ -27,6 +27,7 @@ def _env(monkeypatch: pytest.MonkeyPatch, tmp_path: Any) -> None:
     monkeypatch.setenv("LANDING_URL", "https://example.com")
     monkeypatch.setenv("DATABASE_URL", f"sqlite+aiosqlite:///{db_file}")
     monkeypatch.setenv("LOG_LEVEL", "INFO")
+    monkeypatch.setenv("PAYMENTS_ENABLED", "true")
 
     from app.config import get_settings
     get_settings.cache_clear()
