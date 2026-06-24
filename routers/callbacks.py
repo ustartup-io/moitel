@@ -27,3 +27,15 @@ class MenuCallback(CallbackData, prefix="menu"):
 class OfferCallback(CallbackData, prefix="offer"):
     action: str
     offer_id: str
+
+
+class SupportCallback(CallbackData, prefix="support"):
+    action: str
+    faq_id: str = ""
+    request_id: str = ""
+    category: str = ""
+
+
+class AdminCallback(CallbackData, prefix="admin"):
+    action: str
+    request_id: str = ""

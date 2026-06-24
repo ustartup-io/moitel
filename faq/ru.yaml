@@ -1,0 +1,50 @@
+# FAQ knowledge base — Russian
+# category -> list of {id, patterns:[keywords], answer_key}
+general:
+  - id: what_is_bot
+    patterns: ["что это", "как работает", "о боте", "для чего", "бот"]
+    answer_key: "faq.what_is_bot"
+  - id: is_it_safe
+    patterns: ["безопасно", "надёжно", "мошенничество", "доверие", "легально"]
+    answer_key: "faq.is_it_safe"
+  - id: language_change
+    patterns: ["язык", "сменить язык", "английский", "русский", "переключить"]
+    answer_key: "faq.language_change"
+
+payments:
+  - id: how_to_pay
+    patterns: ["как оплатить", "платёж", "оплата", "купить", "крипто", "тон", "usdt"]
+    answer_key: "faq.how_to_pay"
+  - id: payment_stuck
+    patterns: ["платёж завис", "оплатил но", "не пришло", "не работает оплата", "жду"]
+    answer_key: "faq.payment_stuck"
+  - id: payment_expired
+    patterns: ["истёк", "просрочен", "счёт истёк"]
+    answer_key: "faq.payment_expired"
+
+referrals:
+  - id: how_referral_works
+    patterns: ["реферал", "пригласить", "друг", "поделиться ссылкой", "заработать"]
+    answer_key: "faq.how_referral_works"
+  - id: referral_not_tracked
+    patterns: ["не отслеживается", "реферал не работает", "клик не засчитан", "нет реферала"]
+    answer_key: "faq.referral_not_tracked"
+
+delivery:
+  - id: delivery_not_received
+    patterns: ["не получил", "нет доступа", "где мой", "доставка", "не доставлено"]
+    answer_key: "faq.delivery_not_received"
+  - id: what_is_access
+    patterns: ["что я получу", "что входит", "доступ", "какой доступ"]
+    answer_key: "faq.what_is_access"
+
+compliance:
+  - id: age_requirement
+    patterns: ["возраст", "18", "несовершеннолетний", "сколько лет"]
+    answer_key: "faq.age_requirement"
+  - id: jurisdiction
+    patterns: ["страна", "регион", "юрисдикция", "доступно в", "заблокировано"]
+    answer_key: "faq.jurisdiction"
+  - id: responsible_gambling
+    patterns: ["азартные игры", "зависимость", "проблема", "самоисключение", "лимит", "ответственно"]
+    answer_key: "faq.responsible_gambling"

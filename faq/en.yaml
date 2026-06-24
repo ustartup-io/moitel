@@ -1,0 +1,52 @@
+# FAQ knowledge base — English
+# category -> list of {id, patterns:[keywords], answer_key}
+# answer_key resolves through texts/en.json. If answer_key has no matching text
+# key, the inline answer is used.
+general:
+  - id: what_is_bot
+    patterns: ["what is this", "what does this bot do", "how does this work", "about"]
+    answer_key: "faq.what_is_bot"
+  - id: is_it_safe
+    patterns: ["safe", "legit", "scam", "trust", "secure", "reliable"]
+    answer_key: "faq.is_it_safe"
+  - id: language_change
+    patterns: ["language", "change language", "english", "russian", "switch lang"]
+    answer_key: "faq.language_change"
+
+payments:
+  - id: how_to_pay
+    patterns: ["how to pay", "payment", "invoice", "buy", "purchase", "crypto", "ton", "usdt"]
+    answer_key: "faq.how_to_pay"
+  - id: payment_stuck
+    patterns: ["payment stuck", "paid but", "did not get", "payment not working", "still waiting"]
+    answer_key: "faq.payment_stuck"
+  - id: payment_expired
+    patterns: ["expired", "timeout", "invoice expired"]
+    answer_key: "faq.payment_expired"
+
+referrals:
+  - id: how_referral_works
+    patterns: ["referral", "refer", "invite", "friend", "share link", "earn"]
+    answer_key: "faq.how_referral_works"
+  - id: referral_not_tracked
+    patterns: ["not tracked", "referral not working", "click not counted", "missing referral"]
+    answer_key: "faq.referral_not_tracked"
+
+delivery:
+  - id: delivery_not_received
+    patterns: ["did not receive", "no access", "where is my", "delivery", "not delivered"]
+    answer_key: "faq.delivery_not_received"
+  - id: what_is_access
+    patterns: ["what do i get", "what is included", "access", "what access"]
+    answer_key: "faq.what_is_access"
+
+compliance:
+  - id: age_requirement
+    patterns: ["age", "18", "underage", "how old", "minor"]
+    answer_key: "faq.age_requirement"
+  - id: jurisdiction
+    patterns: ["country", "region", "jurisdiction", "available in", "blocked country"]
+    answer_key: "faq.jurisdiction"
+  - id: responsible_gambling
+    patterns: ["gambling", "addiction", "problem", "self exclusion", "limit", "responsible"]
+    answer_key: "faq.responsible_gambling"

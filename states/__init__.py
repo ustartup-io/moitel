@@ -1,1 +1,4 @@
-"""aiogram FSM state groups added in later steps."""
+"""aiogram FSM state groups."""
+from states.support import SupportStates
+
+__all__ = ["SupportStates"]
