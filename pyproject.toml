@@ -47,7 +47,7 @@ exclude = ["tests*"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-extend-exclude = ["texts", "build", "dist"]
+extend-exclude = ["texts", "build", "dist", "db/migrations/versions"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "RUF"]

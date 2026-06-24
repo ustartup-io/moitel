@@ -42,7 +42,6 @@ routers/        # aiogram routers (handlers) — added in later steps
 services/       # domain services & external clients
 db/             # engine, session, models, repositories, migrations
 middlewares/    # i18n, correlation, throttling
-states/         # aiogram FSM state groups
 utils/          # shared helpers
 texts/          # localization: en.json, ru.json
 tests/          # pytest suite
@@ -104,13 +103,33 @@ secret + base url) raise at startup. Secrets are **never** committed — `.env` 
 
 ---
 
-## Database & Postgres switch point
+## Database & Migrations
 
-SQLite is the MVP store via async SQLAlchemy. To switch to PostgreSQL:
+SQLite is the MVP store via async SQLAlchemy 2.x with **WAL mode** enabled at
+connect time (reduces write contention for the single-process MVP).
+
+### Applying migrations
+
+```bash
+# Create/upgrade the schema on a fresh database:
+alembic upgrade head
+
+# Rollback the latest migration:
+alembic downgrade -1
+```
+
+The bot.db file is created in the project root (or `./data/` in Docker). The
+initial migration (`67e09ba4b9d6`) creates all 12 tables with indexes, FKs, and
+unique constraints.
+
+### Postgres switch point
+
+Switch to PostgreSQL when **concurrent writers** or **broadcast volume** cause
+SQLite write contention:
 
 1. `pip install asyncpg`
 2. Set `DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/dbname`
-3. Re-run Alembic migrations against the new database.
+3. `alembic upgrade head` against the new database.
 
 No application code changes — SQLAlchemy 2 async + Alembic are already in place.
 
