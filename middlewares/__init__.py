@@ -1,1 +1,4 @@
-"""aiogram middleware (i18n, correlation, throttling) added in later steps."""
+"""Middleware package."""
+from middlewares.stack import register_middlewares
+
+__all__ = ["register_middlewares"]

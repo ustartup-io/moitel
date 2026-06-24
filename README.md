@@ -135,6 +135,47 @@ No application code changes — SQLAlchemy 2 async + Alembic are already in plac
 
 ---
 
+## Internationalization (i18n)
+
+All user-facing strings are loaded from `texts/en.json` and `texts/ru.json` at
+startup. Lookup uses `t(key, lang)` with fallback: requested lang → English → key
+string. A parity test (`tests/test_i18n.py`) enforces that both files have
+identical key sets.
+
+Supported languages: **English (en)** and **Russian (ru)** only.
+
+Text keys are dot-namespaced (e.g. `start.welcome`, `compliance.age`).
+Callback data is colon-namespaced (e.g. `lang:set:en`, `compliance:age:yes`).
+
+## Middleware Pipeline
+
+Registered on the Dispatcher in this order (outer → inner):
+
+| # | Middleware | Purpose |
+|---|---|---|
+| 1 | ErrorMiddleware | Catch unhandled exceptions, log + alert admin + show generic error |
+| 2 | ContextMiddleware | Inject settings/logger, bind correlation fields (update_id, user_id) |
+| 3 | DbSessionMiddleware | Open async session per update, commit on success / rollback on error |
+| 4 | UserUpsertMiddleware | Upsert user by telegram_id, attach DB user to handler data |
+| 5 | LanguageMiddleware | Resolve lang from user, expose `t()` translator |
+| 6 | ThrottleMiddleware | Per-user token-bucket rate limit (burst=10, rate=0.5/s) |
+| 7 | AdminMiddleware | Flag `is_admin` when chat_id == ADMIN_CHAT_ID |
+| 8 | ComplianceMiddleware | Flag `is_compliant` for offer/payment route gating |
+
+## Compliance Gate
+
+Before any offer is shown, the bot enforces a compliance gate:
+1. **Legal-age confirmation** (18+) — soft-stop if declined
+2. **Jurisdiction self-attestation** (country/region selection)
+3. **Responsible-gambling notice** acknowledgement — soft-stop if declined
+4. **Terms acceptance** (links to LANDING_URL) — soft-stop if declined
+5. **Marketing opt-in/opt-out** (either choice completes the gate)
+
+All timestamps are persisted to the `users` table (`age_confirmed_at`,
+`jurisdiction_attested_at`, `terms_accepted_at`, `marketing_opt_in`).
+
+---
+
 ## Lint / Type-check / Test
 
 ```bash

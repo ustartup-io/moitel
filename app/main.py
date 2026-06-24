@@ -1,18 +1,22 @@
 """Single source of truth for bot startup.
 
-Builds the Dispatcher, configures logging, and either:
-- runs a boot smoke check (--check) that exits without polling, or
-- starts long polling with graceful shutdown.
+Builds the Dispatcher, registers middleware + routers, configures logging,
+and either runs a boot smoke check (--check) or starts long polling.
 
-Handlers / routers are wired into the Dispatcher in later build steps.
+Handlers / routers are included here. Middleware registration order is defined
+in middlewares/stack.py::register_middlewares.
 """
 from __future__ import annotations
 
 import argparse
 import asyncio
+from typing import TYPE_CHECKING
 
 from app.config import get_settings
 from app.logging_conf import get_logger, setup_logging
+
+if TYPE_CHECKING:
+    from aiogram import Dispatcher
 
 log = get_logger("app.main")
 
@@ -27,6 +31,31 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def build_dispatcher() -> Dispatcher:
+    """Build a fully wired Dispatcher (middleware + routers).
+
+    Imported lazily so the boot check never needs aiogram internals.
+    """
+    from aiogram import Dispatcher
+
+    from middlewares import register_middlewares
+    from routers.common_router import router as common_router
+    from routers.start_router import router as start_router
+    from utils.i18n import i18n
+
+    # Preload texts at startup.
+    i18n.load()
+
+    dp = Dispatcher()
+    register_middlewares(dp)
+
+    # Routers are included in priority order: start first, then common.
+    dp.include_router(start_router)
+    dp.include_router(common_router)
+
+    return dp
+
+
 async def amain(*, check: bool = False) -> None:
     settings = get_settings()
     setup_logging(level=settings.log_level, json_logs=settings.environment == "prod")
@@ -38,16 +67,10 @@ async def amain(*, check: bool = False) -> None:
         webhook_enabled=settings.webhook_enabled,
     )
 
-    # Imported lazily so the boot check never needs network access for aiogram.
-    from aiogram import Dispatcher
-
-    dp = Dispatcher()
-
-    # Routers will be included here in later steps.
-    log.info("dispatcher.ready", included_routers=[])
+    dp = build_dispatcher()
+    log.info("dispatcher.ready", routers=["start", "common"])
 
     if check:
-        # Token-agnostic smoke: we only verify config + logging + Dispatcher build.
         log.info("boot.check.ok", message="Boot smoke check passed; not starting polling.")
         return
 

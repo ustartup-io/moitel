@@ -1,1 +1,27 @@
-{}
+{
+  "start.welcome": "👋 Welcome, {first_name}!",
+  "start.menu_prompt": "What would you like to do?",
+  "lang.choose": "🌐 Please choose your language:",
+  "lang.set": "✅ Language set to English.",
+  "compliance.intro": "📋 Before we continue, please complete a quick verification. This is required to proceed.",
+  "compliance.age": "🔞 Are you 18 years of age or older?",
+  "compliance.jurisdiction": "🌍 What is your country/region of residence?",
+  "compliance.responsible_gambling": "⚠️ Do you acknowledge that gambling carries risk and you should only gamble what you can afford to lose? Support: begambleaware.org",
+  "compliance.terms": "📄 Do you accept our Terms of Service? Read them here: {landing_url}",
+  "compliance.marketing": "📧 Would you like to receive promotional messages? You can opt out anytime.",
+  "compliance.confirmed": "✅ All set! You can now use the bot.",
+  "compliance.blocked": "⛔ We're sorry, but you must meet all requirements to continue.",
+  "compliance.jurisdiction_other": "🌍 Other",
+  "compliance.continue": "➡️ Continue",
+  "help.body": "ℹ️ This bot routes you to a partner offer and tracks referrals.\n\nNeed help? Visit: {landing_url}\n\nUse the menu buttons below to navigate.",
+  "menu.title": "🏠 Main Menu",
+  "menu.catalog": "📚 View Offers",
+  "menu.referral": "🔗 My Referral",
+  "menu.support": "💬 Support",
+  "common.back": "⬅️ Back",
+  "common.yes": "✅ Yes",
+  "common.no": "❌ No",
+  "error.generic": "😵 Something went wrong. Please try again later.",
+  "throttle.slow_down": "⏳ Please slow down. Try again in a moment.",
+  "stub.not_ready": "🔧 This feature is coming soon."
+}

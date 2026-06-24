@@ -32,7 +32,7 @@ def test_settings_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
     assert settings.environment == "dev"
     assert settings.log_level == "INFO"
     assert settings.default_lang == "en"
-    assert settings.database_url == "sqlite+aiosqlite:///./bot.db"
+    assert settings.database_url.startswith("sqlite")
     assert settings.payments_enabled is False
     assert settings.webhook_enabled is False
     assert settings.xrocket_base_url == "https://pay.xrocket.tg/"

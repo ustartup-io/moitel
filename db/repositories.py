@@ -66,16 +66,26 @@ class UserRepository(Repository):
             user.status = status
             await self.session.flush()
 
+    async def set_lang(self, telegram_id: int, lang: Lang) -> User | None:
+        """Set only the user's language."""
+        user = await self.get_by_telegram_id(telegram_id)
+        if user is None:
+            return None
+        user.lang = lang
+        await self.session.flush()
+        return user
+
     async def set_compliance(
         self,
         *,
         telegram_id: int,
         lang: Lang | None = None,
         jurisdiction_code: str | None = None,
-        age_confirmed: bool = False,
-        terms_accepted: bool = False,
-        marketing_opt_in: bool = False,
+        age_confirmed: bool | None = None,
+        terms_accepted: bool | None = None,
+        marketing_opt_in: bool | None = None,
     ) -> User | None:
+        """Partially update compliance fields. Only sets fields that are not None."""
         user = await self.get_by_telegram_id(telegram_id)
         if user is None:
             return None
@@ -89,7 +99,8 @@ class UserRepository(Repository):
             user.age_confirmed_at = now
         if terms_accepted:
             user.terms_accepted_at = now
-        user.marketing_opt_in = marketing_opt_in
+        if marketing_opt_in is not None:
+            user.marketing_opt_in = marketing_opt_in
         await self.session.flush()
         return user
 
