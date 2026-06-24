@@ -136,13 +136,24 @@ class ConversionService:
     async def update_status(
         self, conversion_id: int, status: ConversionStatus
     ) -> Conversion | None:
-        """Update a conversion's status (pending -> approved/rejected)."""
+        """Update a conversion's status (pending -> approved/rejected).
+
+        FIX: trigger delivery when status transitions to approved.
+        """
         conv = await self.session.get(Conversion, conversion_id)
         if conv is None:
             return None
+        old_status = conv.status
         conv.status = status
         await self.session.flush()
         log.info("conversion.status_updated", conversion_id=conversion_id, status=status)
+
+        # Trigger delivery when newly approved (not already approved before).
+        if status == ConversionStatus.approved and old_status != ConversionStatus.approved:
+            from services.delivery_service import DeliveryService
+            delivery_service = DeliveryService(self.session)
+            await delivery_service.deliver_for_conversion(conv)
+
         return conv
 
     async def _find_last_touch_click(

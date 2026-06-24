@@ -163,6 +163,15 @@ async def affiliate_postback(
             status=status_enum,
             referral_code=payload.referral_code,
         )
+        # FIX 3: trigger delivery for approved conversions (affiliate path).
+        if (
+            result.status == "created"
+            and result.conversion is not None
+            and result.conversion.status == ConversionStatus.approved
+        ):
+            from services.delivery_service import DeliveryService
+            delivery_service = DeliveryService(session)
+            await delivery_service.deliver_for_conversion(result.conversion)
         await session.commit()
 
     return {

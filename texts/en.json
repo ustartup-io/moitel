@@ -64,5 +64,14 @@
   "support.admin_escalation_card": "🔔 <b>New escalation</b>\nUser: <code>{user_id}</code> (@{username})\nLang: {lang}\nState: {state}\nRequest: #{request_id}\nMessage: {message}",
   "support.admin_reply_prompt": "Reply to this message to respond to the user.",
   "support.category": "📂 {category}",
-  "support.back_to_faq": "⬅️ Back to FAQ"
+  "support.back_to_faq": "⬅️ Back to FAQ",
+  "catalog.title": "📚 Available Offers",
+  "catalog.empty": "No offers available right now. Check back soon!",
+  "catalog.offer_item": "📌 {title}\n🔗 {url}",
+  "catalog.not_compliant": "⛔ You need to complete verification first. Type /start to continue.",
+  "catalog.view_offer": "View Offer",
+  "catalog.paid_offer": "💸 {title} — {amount} {currency}",
+  "catalog.buy": "Buy Access",
+  "offer.view": "🔗 Here's your link:\n{url}\n\nTap to continue to the partner offer.",
+  "offer.requires_payment": "💸 This offer requires payment of {amount} {currency}."
 }

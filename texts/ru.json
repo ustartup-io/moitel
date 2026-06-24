@@ -64,5 +64,14 @@
   "support.admin_escalation_card": "🔔 <b>Новая эскалация</b>\nПользователь: <code>{user_id}</code> (@{username})\nЯзык: {lang}\nСтатус: {state}\nЗапрос: #{request_id}\nСообщение: {message}",
   "support.admin_reply_prompt": "Ответьте на это сообщение, чтобы связаться с пользователем.",
   "support.category": "📂 {category}",
-  "support.back_to_faq": "⬅️ Назад к FAQ"
+  "support.back_to_faq": "⬅️ Назад к FAQ",
+  "catalog.title": "📚 Доступные предложения",
+  "catalog.empty": "Сейчас нет доступных предложений. Загляните позже!",
+  "catalog.offer_item": "📌 {title}\n🔗 {url}",
+  "catalog.not_compliant": "⛔ Сначала пройдите проверку. Введите /start для продолжения.",
+  "catalog.view_offer": "Открыть предложение",
+  "catalog.paid_offer": "💸 {title} — {amount} {currency}",
+  "catalog.buy": "Купить доступ",
+  "offer.view": "🔗 Вот ваша ссылка:\n{url}\n\nНажмите, чтобы перейти к партнёрскому предложению.",
+  "offer.requires_payment": "💸 Это предложение требует оплаты {amount} {currency}."
 }

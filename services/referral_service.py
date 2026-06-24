@@ -77,7 +77,12 @@ class ReferralService:
 
         If the click is suppressed by anti-fraud, returns (None, result).
         """
-        offer_id = referral.offer_id or 1  # fallback if no offer linked
+        offer_id = referral.offer_id
+        if offer_id is None:
+            log.warning(
+                "click.no_offer_linked", referral_id=referral.id
+            )
+            return None, AntiFraudResult(blocked=True, reason="no_offer_linked")
 
         # Run anti-fraud checks.
         fraud_result = await self._anti_fraud.check_click(
