@@ -6,7 +6,25 @@ services:
     restart: unless-stopped
     volumes:
       # Persist the SQLite database across rebuilds.
-      # In .env set: DATABASE_URL=sqlite+aiosqlite:///./data/bot.db
-      - ./data:/app/data
+      - bot-data:/app/data
     # Long polling: no ports needed.
-    # Webhook mode (added in a later step) will expose "8080:8080".
+    # If using DATABASE_URL=sqlite+aiosqlite:///./data/bot.db,
+    # the DB persists in the named volume.
+
+  # Uncomment to run the webhook server (only if WEBHOOK_ENABLED=true):
+  # webhook:
+  #   build: .
+  #   container_name: affiliate-webhook
+  #   env_file: .env
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - bot-data:/app/data
+  #   command: >
+  #     sh -c "alembic upgrade head && uvicorn app.webhook_app:create_app --factory --host 0.0.0.0 --port 8080"
+  #   depends_on:
+  #     - bot
+
+volumes:
+  bot-data:

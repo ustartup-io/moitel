@@ -8,18 +8,29 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# Keep build tooling current so editable install resolves cleanly.
-RUN pip install --upgrade pip setuptools wheel
+# Install dependencies first (better layer caching).
+COPY pyproject.toml MANIFEST.in ./
+COPY app/ app/
+COPY routers/ routers/
+COPY services/ services/
+COPY db/ db/
+COPY middlewares/ middlewares/
+COPY states/ states/
+COPY utils/ utils/
+COPY texts/ texts/
+COPY faq/ faq/
+COPY alembic.ini ./
+COPY db/migrations/ db/migrations/
 
-# Copy source (editable install keeps __file__ rooted in this tree).
-COPY . .
+RUN pip install --upgrade pip && pip install -e .
 
-RUN pip install -e .
+# Create non-root user.
+RUN useradd -r -s /bin/false botuser && chown -R botuser:botuser /app
+USER botuser
 
-# Default to production-ish runtime env; secrets come from .env / compose.
+# Default env.
 ENV ENVIRONMENT=prod \
     LOG_LEVEL=INFO
 
-# Long polling by default: no ports exposed. Webhook mode (later step)
-# will expose 8080 for the FastAPI process.
-CMD ["python", "-m", "app.main"]
+# Entrypoint: run migrations, then start bot.
+CMD ["sh", "-c", "alembic upgrade head && python -m app.main"]

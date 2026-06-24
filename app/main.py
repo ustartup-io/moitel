@@ -39,6 +39,7 @@ def build_dispatcher() -> Dispatcher:
     from aiogram import Dispatcher
 
     from middlewares import register_middlewares
+    from routers.admin_router import router as admin_router
     from routers.common_router import router as common_router
     from routers.referral_router import router as referral_router
     from routers.start_router import router as start_router
@@ -53,7 +54,8 @@ def build_dispatcher() -> Dispatcher:
     dp = Dispatcher()
     register_middlewares(dp)
 
-    # Routers: start first, then referral, support, common.
+    # Routers: admin first (highest priority for admin commands), then user flows.
+    dp.include_router(admin_router)
     dp.include_router(start_router)
     dp.include_router(referral_router)
     dp.include_router(support_router)
@@ -74,7 +76,7 @@ async def amain(*, check: bool = False) -> None:
     )
 
     dp = build_dispatcher()
-    log.info("dispatcher.ready", routers=["start", "referral", "support", "common"])
+    log.info("dispatcher.ready", routers=["admin", "start", "referral", "support", "common"])
 
     if check:
         log.info("boot.check.ok", message="Boot smoke check passed; not starting polling.")
@@ -89,6 +91,7 @@ async def amain(*, check: bool = False) -> None:
     if settings.payments_enabled:
         from services.jobs import job_manager
         job_mgr = job_manager
+        job_mgr.set_bot(bot)
         await job_mgr.start_all()
 
     log.info("bot.polling.start")

@@ -6,9 +6,9 @@ shutdown event. Started by app.main; no Celery/Redis.
 Jobs:
   - payment_polling: poll xRocket for pending payments (fallback confirmation)
   - delivery_retry: retry failed deliveries (capped backoff)
-  - webhook_reconciliation: reconcile pending webhook events
+  - webhook_reconcile: reconcile pending webhook events
   - expired_payment_cleanup: mark old pending payments as expired
-  - broadcast_worker: send queued broadcasts (used in Step 7)
+  - broadcast_worker: send queued broadcasts with rate limiting + opt-out
   - health_heartbeat: periodic health log + optional admin ping
 """
 from __future__ import annotations
@@ -17,6 +17,7 @@ import asyncio
 from collections.abc import Awaitable, Callable
 from contextlib import suppress
 from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import select
 
@@ -26,6 +27,9 @@ from db.models import Payment, WebhookEvent
 from db.session import get_session
 from services.delivery_service import DeliveryService
 from services.payment_service import PaymentService
+
+if TYPE_CHECKING:
+    from aiogram import Bot
 
 log = get_logger("app.jobs")
 
@@ -43,13 +47,28 @@ PAYMENT_EXPIRY_HOURS = 24
 class JobManager:
     """Manages background asyncio tasks with graceful shutdown."""
 
-    def __init__(self) -> None:
+    def __init__(self, bot: Bot | None = None) -> None:
         self._shutdown = asyncio.Event()
         self._tasks: list[asyncio.Task[None]] = []
+        self._bot = bot
+        self._error_counts: dict[str, int] = {}
 
     @property
     def is_shutting_down(self) -> bool:
         return self._shutdown.is_set()
+
+    def set_bot(self, bot: Bot) -> None:
+        """Set the Bot instance (for broadcast_worker)."""
+        self._bot = bot
+
+    @property
+    def job_statuses(self) -> dict[str, Any]:
+        """Return status info for /health."""
+        return {
+            "jobs_running": len(self._tasks),
+            "is_shutting_down": self._shutdown.is_set(),
+            "error_counts": dict(self._error_counts),
+        }
 
     async def start_all(self) -> None:
         """Start all background jobs."""
@@ -102,6 +121,7 @@ class JobManager:
             try:
                 await coro_fn()
             except Exception:
+                self._error_counts[name] = self._error_counts.get(name, 0) + 1
                 log.error("job.error", name=name, exc_info=True)
             with suppress(TimeoutError):
                 await asyncio.wait_for(self._shutdown.wait(), timeout=interval)
@@ -187,8 +207,16 @@ class JobManager:
             log.warning("payment.expired_cleanup", count=len(stale))
 
     async def _broadcast_worker(self) -> None:
-        """Process queued broadcasts (defined now, used in Step 7)."""
-        # TODO(M7): implement broadcast queue processing with rate limiting.
+        """Process queued broadcasts with rate limiting + opt-out respect."""
+        if self._bot is None:
+            return
+
+        from services.broadcast_service import BroadcastService
+
+        async with get_session() as session:
+            svc = BroadcastService(session)
+            await svc.process_queue(self._bot)
+            await session.commit()
 
     async def _health_heartbeat(self) -> None:
         """Log a periodic health heartbeat."""
