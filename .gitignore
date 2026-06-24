@@ -1,0 +1,39 @@
+# secrets & local config
+.env
+.env.*
+!.env.example
+
+# databases
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# venvs
+.venv/
+.venv*/
+
+# tooling caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# local runtime data
+/data/
+
+# editors / os
+.vscode/
+.idea/
+.DS_Store
